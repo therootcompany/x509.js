@@ -665,23 +665,13 @@ X509.parseRsaPkcs8 = function parseRsaPkcs8(asn1, jwk) {
 
 	// might be a buffer
 	if (!Array.isArray(asn1)) {
-		/*
-		console.log(
-			JSON.stringify(ASN1.parse({ der: asn1, verbose: true, json: false }), null, 2)
-		);
-    */
 		asn1 = ASN1.parse({ der: asn1, verbose: true, json: false });
 	}
 	if (
 		2 === asn1.children.length &&
-		0x03 === asn1.children[1].type &&
-		0x30 === asn1.children[1].value[0]
+		0x03 === asn1.children[1].type // && 2 === asn1.children[1].children.length
 	) {
-		asn1 = ASN1.parse({
-			der: asn1.children[1].value,
-			verbose: true,
-			json: false
-		});
+		asn1 = asn1.children[1].children[0];
 		jwk.n = Enc.bufToUrlBase64(asn1.children[0].value);
 		jwk.e = Enc.bufToUrlBase64(asn1.children[1].value);
 		jwk.kty = 'RSA';
@@ -713,7 +703,6 @@ X509.parseSpki = function(buf, jwk) {
 	try {
 		return X509.parseRsaPkcs8(buf, jwk);
 	} catch (e) {
-		//console.error(e);
 		return X509.parseEcSpki(buf, jwk);
 	}
 };

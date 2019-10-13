@@ -8,8 +8,8 @@ and [Keypairs.js](https://git.rootprojects.org/root/keypairs.js)
 Lightweight, Zero-Dependency, x509 encoder and decoder for Node.js and Browsers
 
 | 1.6k gzipped
-| 6.9k minified
-| 9.9k pretty
+| 6.8k minified
+| 9.7k pretty
 |
 
 This provides a set ASN.1 / x509 schemas for DER encoding and decoding

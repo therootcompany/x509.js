@@ -1,6 +1,6 @@
 {
 	"name": "@root/x509",
-	"version": "0.7.0",
+	"version": "0.7.1",
 	"description": "VanillaJS, Lightweight, Zero-Dependency, X509 schema encoder and decoder.",
 	"main": "index.js",
 	"browser": {
