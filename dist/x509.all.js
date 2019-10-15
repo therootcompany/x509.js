@@ -536,7 +536,7 @@ X509.parsePkcs1 = function parseRsaPkcs1(asn1, jwk) {
 	}
 
 	// might be a buffer
-	if (!Array.isArray(asn1)) {
+	if (asn1.byteLength) {
 		asn1 = ASN1.parse({ der: asn1, verbose: true, json: false });
 	}
 
@@ -664,7 +664,7 @@ X509.parseRsaPkcs8 = function parseRsaPkcs8(asn1, jwk) {
 	}
 
 	// might be a buffer
-	if (!Array.isArray(asn1)) {
+	if (asn1.byteLength) {
 		asn1 = ASN1.parse({ der: asn1, verbose: true, json: false });
 	}
 	if (
@@ -696,6 +696,7 @@ X509.parseRsaPkcs8 = function parseRsaPkcs8(asn1, jwk) {
 			'not an RSA PKCS#8 public or private key (wrong format)'
 		);
 	}
+
 	return jwk;
 };
 
@@ -738,6 +739,47 @@ X509.parseEcSpki = function(u8, jwk) {
 };
 
 X509.parsePkix = X509.parseSpki;
+
+// TODO look for ECDSA as well
+X509._parseRsa = function(asn1) {
+	// accepting der for compatability with other usages
+
+	if (asn1.byteLength) {
+		asn1 = ASN1.parse({ der: asn1, verbose: true, json: false });
+	}
+
+	var meta = { kty: 'RSA', format: 'pkcs1', public: true };
+	//meta.asn1 = ASN1.parse(u8);
+
+	if (
+		asn1.children.every(function(el) {
+			return 0x02 === el.type;
+		})
+	) {
+		if (2 === asn1.children.length) {
+			// rsa pkcs1 public
+			//return meta;
+		} else if (asn1.children.length >= 9) {
+			// the standard allows for "otherPrimeInfos", hence at least 9
+			meta.public = false;
+			// rsa pkcs1 private
+			//return meta;
+		} else {
+			throw new Error(
+				'not an RSA PKCS#1 public or private key (wrong number of ints)'
+			);
+		}
+	} else {
+		meta.format = 'pkcs8';
+	}
+
+	var jwk = { kty: 'RSA', n: null, e: null };
+	if ('pkcs1' === meta.format) {
+		return X509.parsePkcs1(asn1, jwk);
+	} else {
+		return X509.parsePkcs8(asn1, jwk);
+	}
+};
 
 
 // 1.2.840.10045.3.1.7
